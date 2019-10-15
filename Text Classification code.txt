@@ -1,0 +1,161 @@
+Installing fastText
+$ wget https://github.com/facebookresearch/fastText/archive/v0.9.1.zip
+$ unzip v0.9.1.zip
+
+Move to the fastText directory and build it:
+$ cd fastText-0.9.1
+# for command line tool :
+$ make
+# for python bindings :
+$ pip install .
+
+Running the binary without any argument will print the high level documentation, showing the different use cases supported by fastText
+>> ./fasttext
+usage: fasttext <command> <args>
+
+The commands supported by fasttext are:
+
+  supervised              train a supervised classifier
+  quantize                quantize a model to reduce the memory usage
+  test                    evaluate a supervised classifier
+  predict                 predict most likely labels
+  predict-prob            predict most likely labels with probabilities
+  skipgram                train a skipgram model
+  cbow                    train a cbow model
+  print-word-vectors      print word vectors given a trained model
+  print-sentence-vectors  print sentence vectors given a trained model
+  nn                      query for nearest neighbors
+  analogies               query for analogies
+
+Getting and preparing the data
+>> wget https://dl.fbaipublicfiles.com/fasttext/data/cooking.stackexchange.tar.gz && tar xvzf cooking.stackexchange.tar.gz
+>> head cooking.stackexchange.txt
+   wc cooking.stackexchange.txt
+   15404  169582 1401900 cooking.stackexchange.txt
+>> head -n 12404 cooking.stackexchange.txt > cooking.train
+>> tail -n 3000 cooking.stackexchange.txt > cooking.valid
+
+Our first classifier
+>> ./fasttext supervised -input cooking.train -output model_cooking
+Read 0M words
+Number of words:  14598
+Number of labels: 734
+Progress: 100.0%  words/sec/thread: 75109  lr: 0.000000  loss: 5.708354  eta: 0h0m
+
+Now, we can test our classifier, by :
+>> ./fasttext predict model_cooking.bin -
+
+To get a better sense of its quality, let's test it on the validation data by running:
+>> ./fasttext test model_cooking.bin cooking.valid
+N  3000
+P@1  0.124
+R@1  0.0541
+Number of examples: 3000
+
+We can also compute the precision at five and recall at five with:
+>> ./fasttext test model_cooking.bin cooking.valid 5
+N  3000
+P@5  0.0668
+R@5  0.146
+Number of examples: 3000
+
+Advanced readers: precision and recall
+>> ./fasttext predict model_cooking.bin - 5
+
+Making the model better
+preprocessing the data
+>> cat cooking.stackexchange.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" > cooking.preprocessed.txt
+>> head -n 12404 cooking.preprocessed.txt > cooking.train
+>> tail -n 3000 cooking.preprocessed.txt > cooking.valid
+
+Let's train a new model on the pre-processed data:
+>> ./fasttext supervised -input cooking.train -output model_cooking
+Read 0M words
+Number of words:  9012
+Number of labels: 734
+Progress: 100.0%  words/sec/thread: 82041  lr: 0.000000  loss: 5.671649  eta: 0h0m
+
+>> ./fasttext test model_cooking.bin cooking.valid
+N  3000
+P@1  0.164
+R@1  0.0717
+Number of examples: 3000
+
+more epochs and larger learning rate
+>> ./fasttext supervised -input cooking.train -output model_cooking -epoch 25
+Read 0M words
+Number of words:  9012
+Number of labels: 734
+Progress: 100.0%  words/sec/thread: 77633  lr: 0.000000  loss: 7.147976  eta: 0h0m
+
+Let's test the new model:
+>> ./fasttext test model_cooking.bin cooking.valid
+N  3000
+P@1  0.501
+R@1  0.218
+Number of examples: 3000
+>> ./fasttext supervised -input cooking.train -output model_cooking -lr 1.0  
+Read 0M words
+Number of words:  9012
+Number of labels: 734
+Progress: 100.0%  words/sec/thread: 81469  lr: 0.000000  loss: 6.405640  eta: 0h0m
+
+>> ./fasttext test model_cooking.bin cooking.valid
+N  3000
+P@1  0.563
+R@1  0.245
+Number of examples: 3000
+
+Even better! Let's try both together:
+>> ./fasttext supervised -input cooking.train -output model_cooking -lr 1.0 -epoch 25
+Read 0M words
+Number of words:  9012
+Number of labels: 734
+Progress: 100.0%  words/sec/thread: 76394  lr: 0.000000  loss: 4.350277  eta: 0h0m
+
+>> ./fasttext test model_cooking.bin cooking.valid
+N  3000
+P@1  0.585
+R@1  0.255
+Number of examples: 3000
+word n-grams
+>> ./fasttext supervised -input cooking.train -output model_cooking -lr 1.0 -epoch 25 -wordNgrams 2
+Read 0M words
+Number of words:  9012
+Number of labels: 734
+Progress: 100.0%  words/sec/thread: 75366  lr: 0.000000  loss: 3.226064  eta: 0h0m
+
+>> ./fasttext test model_cooking.bin cooking.valid
+N  3000
+P@1  0.599
+R@1  0.261
+Number of examples: 3000
+
+Scaling things up:
+>> ./fasttext supervised -input cooking.train -output model_cooking -lr 1.0 -epoch 25 -wordNgrams 2 -bucket 200000 -dim 50 -loss hs
+Read 0M words
+Number of words:  9012
+Number of labels: 734
+Progress: 100.0%  words/sec/thread: 2199406  lr: 0.000000  loss: 1.718807  eta: 0h0m
+
+Multi-label classification:
+>> ./fasttext supervised -input cooking.train -output model_cooking -lr 0.5 -epoch 25 -wordNgrams 2 -bucket 200000 -dim 50 -loss one-vs-all
+Read 0M words
+Number of words:  14543
+Number of labels: 735
+Progress: 100.0% words/sec/thread:   72104 lr:  0.000000 loss:  4.340807 ETA:   0h 0m
+
+>> ./fasttext predict-prob model_cooking.bin - -1 0.5
+__label__baking 1.00000 __label__bananas 0.939923 __label__bread 0.592677
+
+We can also evaluate our results with the test command :
+>> ./fasttext test model_cooking.bin cooking.valid -1 0.5
+N 3000
+P@-1  0.702
+R@-1  0.2
+Number of examples: 3000
+>> ./fasttext test model_cooking.bin cooking.valid -1 0.1
+N 3000
+P@-1  0.591
+R@-1  0.272
+Number of examples: 3000
