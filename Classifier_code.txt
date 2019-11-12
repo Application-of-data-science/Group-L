@@ -1,0 +1,214 @@
+#original
+#dividing data set into train and valid
+head -n 12404 cooking.stackexchange.txt > cooking.train
+tail -n 3000 cooking.stackexchange.txt > cooking.valid
+
+# first classifier on traiing data
+./fasttext supervised -input cooking.train -output model_cooking
+
+#Testing new model for percision and recall at 1
+./fasttext test model_cooking.bin cooking.valid
+
+# Testing new model for percision and recall at 5 
+./fasttext test model_cooking.bin cooking.valid 5 
+
+#Prepocessing step and dividing dataset into train and valid 
+cat cooking.stackexchange.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" > cooking.preprocessed.txt
+head -n 12404 cooking.preprocessed.txt > cooking.train
+tail -n 3000 cooking.preprocessed.txt > cooking.valid
+
+# training model 
+./fasttext supervised -input cooking.train -output model_cooking
+
+#Testing new model for percision and recall at 1 
+./fasttext test model_cooking.bin cooking.valid 
+
+#trainng data at epoch 25
+./fasttext supervised -input cooking.train -output model_cooking -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_cooking.bin cooking.valid 
+
+#training data at leraning rate 1
+./fasttext supervised -input cooking.train -output model_cooking -lr 1.0  
+
+#Testing new model for percision and recall at 1
+./fasttext test model_cooking.bin cooking.valid 
+
+#training data at epoch 25 and learning rate 1
+./fasttext supervised -input cooking.train -output model_cooking -lr 1.0 -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_cooking.bin cooking.valid 
+
+#training data (multilabel)
+./fasttext supervised -input cooking.train -output model_cooking -lr 0.5 -epoch 25 -wordNgrams 2 -bucket 200000 -dim 50 -loss one-vs-all
+
+ # Testing new model for percision and recall at 1
+./fasttext test model_cooking.bin cooking.valid -1 0.1
+
+#Testing new model for percision and recall at 5
+./fasttext test model_cooking.bin cooking.valid -1 0.5 
+
+===================================================================
+
+#Movies
+#dividing data set into train and valid
+head -n 14829 movies.stackexchange.txt > movies.train
+tail -n 4000 movies.stackexchange.txt > movies.valid
+
+# first classifier on traiing data
+./fasttext supervised -input movies.train -output model_movies
+
+#Testing new model for percision and recall at 1
+./fasttext test model_movies.bin movies.valid
+
+# Testing new model for percision and recall at 5 
+./fasttext test model_movies.bin movies.valid 5 
+
+#Prepocessing step and dividing dataset into train and valid 
+cat movies.stackexchange.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" > movies.preprocessed.txt
+head -n 14829 movies.preprocessed.txt > movies.train
+tail -n 4000 movies.preprocessed.txt > movies.valid
+
+# training model 
+./fasttext supervised -input movies.train -output model_movies
+
+#Testing new model for percision and recall at 1 
+./fasttext test model_movies.bin movies.valid 
+
+#trainng data at epoch 25
+./fasttext supervised -input movies.train -output model_movies -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_movies.bin movies.valid 
+
+#training data at leraning rate 1
+./fasttext supervised -input movies.train -output model_movies -lr 1.0  
+
+#Testing new model for percision and recall at 1
+./fasttext test model_movies.bin movies.valid 
+
+#training data at epoch 25 and learning rate 1
+./fasttext supervised -input movies.train -output model_movies -lr 1.0 -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_movies.bin movies.valid 
+
+#training data (multilabel)
+./fasttext supervised -input movies.train -output model_movies -lr 0.5 -epoch 25 -wordNgrams 2 -bucket 200000 -dim 50 -loss one-vs-all
+
+ # Testing new model for percision and recall at 1
+./fasttext test model_movies.bin movies.valid -1 0.1
+
+#Testing new model for percision and recall at 5
+./fasttext test model_movies.bin movies.valid -1 0.5 
+
+==========================================================
+
+#travel
+#dividing data set into train and valid
+head -n 30131 travel.stackexchange.txt > travel.train
+tail -n 9000 travel.stackexchange.txt > travel.valid
+
+# first classifier on traiing data
+./fasttext supervised -input travel.train -output model_travel
+
+#Testing new model for percision and recall at 1
+./fasttext test model_travel.bin travel.valid
+
+# Testing new model for percision and recall at 5 
+./fasttext test model_travel.bin travel.valid 5 
+
+#Prepocessing step and dividing dataset into train and valid 
+cat travel.stackexchange.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" > travel.preprocessed.txt
+head -n 30131 travel.preprocessed.txt > travel.train
+tail -n 9000 travel.preprocessed.txt > travel.valid
+
+# training model 
+./fasttext supervised -input travel.train -output model_travel
+
+#Testing new model for percision and recall at 1 
+./fasttext test model_travel.bin travel.valid 
+
+#trainng data at epoch 25
+./fasttext supervised -input travel.train -output model_travel -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_travel.bin travel.valid 
+
+#training data at leraning rate 1
+./fasttext supervised -input travel.train -output model_travel -lr 1.0  
+
+#Testing new model for percision and recall at 1
+./fasttext test model_travel.bin travel.valid 
+
+#training data at epoch 25 and learning rate 1
+./fasttext supervised -input travel.train -output model_travel -lr 1.0 -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_travel.bin travel.valid 
+
+#training data (multilabel)
+./fasttext supervised -input travel.train -output model_travel -lr 0.5 -epoch 25 -wordNgrams 2 -bucket 200000 -dim 50 -loss one-vs-all
+
+ # Testing new model for percision and recall at 1
+./fasttext test model_travel.bin travel.valid -1 0.1
+
+#Testing new model for percision and recall at 5
+./fasttext test model_travel.bin travel.valid -1 0.5 
+
+=============================================
+
+#finance
+#dividing data set into train and valid
+head -n 10712 finance.stackexchange.txt > finance.train
+tail -n 3000 finance.stackexchange.txt > finance.valid
+
+# first classifier on traiing data
+./fasttext supervised -input finance.train -output model_finance
+
+#Testing new model for percision and recall at 1
+./fasttext test model_finance.bin finance.valid
+
+# Testing new model for percision and recall at 5 
+./fasttext test model_finance.bin finance.valid 5 
+
+#Prepocessing step and dividing dataset into train and valid 
+cat finance.stackexchange.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" | tr "[:upper:]" "[:lower:]" > finance.preprocessed.txt
+head -n 10712 finance.preprocessed.txt > finance.train
+tail -n 3000 finance.preprocessed.txt > finance.valid
+
+# training model 
+./fasttext supervised -input finance.train -output model_finance
+
+#Testing new model for percision and recall at 1 
+./fasttext test model_finance.bin finance.valid 
+
+#trainng data at epoch 25
+./fasttext supervised -input finance.train -output model_finance -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_finance.bin finance.valid 
+
+#training data at leraning rate 1
+./fasttext supervised -input finance.train -output model_finance -lr 1.0  
+
+#Testing new model for percision and recall at 1
+./fasttext test model_finance.bin finance.valid 
+
+#training data at epoch 25 and learning rate 1
+./fasttext supervised -input finance.train -output model_finance -lr 1.0 -epoch 25
+
+#Testing new model for percision and recall at 1
+./fasttext test model_finance.bin finance.valid 
+
+#training data (multilabel)
+./fasttext supervised -input finance.train -output model_finance -lr 0.5 -epoch 25 -wordNgrams 2 -bucket 200000 -dim 50 -loss one-vs-all
+
+ # Testing new model for percision and recall at 1
+./fasttext test model_finance.bin finance.valid -1 0.1
+
+#Testing new model for percision and recall at 5
+./fasttext test model_finance.bin finance.valid -1 0.5 
+
